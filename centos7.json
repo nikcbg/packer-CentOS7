@@ -1,0 +1,42 @@
+{
+  "builders": [{
+    "type": "virtualbox-iso",
+    "guest_os_type": "RedHat_64",
+    "iso_url": "http://mirrors.neterra.net/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso",
+    "iso_checksum": "38d5d51d9d100fd73df031ffd6bd8b1297ce24660dc8c13a3b8b4534a4bd291c",
+    "iso_checksum_type": "sha256",
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_wait_timeout": "1500s",
+    "boot_command": [
+      "<esc>",
+      "<wait>linux inst.ks=hd:/dev/fd0:ks.cfg<enter>"
+    ],
+    "boot_wait": "5s",
+    "disk_size": 100000,
+    "floppy_files": [
+      "ks.cfg"
+    ],
+    "hard_drive_interface": "sata",
+    "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "1024"]
+    ]
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo mkdir /media/VBoxGuestAdditions",
+      "sudo mount -o loop,ro /home/vagrant/VBoxGuestAdditions.iso /media/VBoxGuestAdditions",
+      "sudo /bin/sh /media/VBoxGuestAdditions/VBoxLinuxAdditions.run",
+      "sudo umount /media/VBoxGuestAdditions",
+      "sudo rmdir /media/VBoxGuestAdditions"
+    ]
+  }],
+  "post-processors": [{
+    "type": "vagrant",
+    "keep_input_artifact": true,
+    "output": "centos_7_with_guestadditions.box"
+  }]
+}
